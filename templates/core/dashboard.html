@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<!-- Statistiques principales -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card card-stats border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Aéronefs
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ aircraft_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-plane fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card card-stats border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Données de vol
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ flight_data_count|floatformat:0 }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-route fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card card-stats border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Alertes non traitées
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ unprocessed_alerts_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card card-stats border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Violations détectées
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ violations_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-ban fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Alertes récentes -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Alertes récentes</h6>
+                <a href="{% url 'core:alerts_list' %}" class="btn btn-sm btn-primary">Voir tout</a>
+            </div>
+            <div class="card-body">
+                {% if recent_alerts %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Zone</th>
+                                    <th>Date/Heure</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in recent_alerts %}
+                                <tr>
+                                    <td>{{ alert.red_zone.name }}</td>
+                                    <td>{{ alert.timestamp|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        {% if alert.is_processed %}
+                                            <span class="badge bg-success">Traitée</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">En attente</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Aucune alerte récente</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Violations récentes -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Violations récentes</h6>
+                <a href="{% url 'reports:violations_report' %}" class="btn btn-sm btn-primary">Voir tout</a>
+            </div>
+            <div class="card-body">
+                {% if recent_violations %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Aéronef</th>
+                                    <th>Zone</th>
+                                    <th>Date/Heure</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for violation in recent_violations %}
+                                <tr>
+                                    <td>{{ violation.aircraft.aircraft_id }}</td>
+                                    <td>{{ violation.alert.red_zone.name }}</td>
+                                    <td>{{ violation.alert.timestamp|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Aucune violation récente</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sessions d'analyse récentes -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Sessions d'analyse récentes</h6>
+            </div>
+            <div class="card-body">
+                {% if recent_sessions %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Statut</th>
+                                    <th>Violations trouvées</th>
+                                    <th>Début</th>
+                                    <th>Fin</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in recent_sessions %}
+                                <tr>
+                                    <td>{{ session.name }}</td>
+                                    <td>
+                                        {% if session.status == 'completed' %}
+                                            <span class="badge bg-success">Terminée</span>
+                                        {% elif session.status == 'running' %}
+                                            <span class="badge bg-primary">En cours</span>
+                                        {% elif session.status == 'failed' %}
+                                            <span class="badge bg-danger">Échouée</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">En attente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ session.violations_found }}</td>
+                                    <td>{{ session.start_time|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        {% if session.end_time %}
+                                            {{ session.end_time|date:"d/m/Y H:i" }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Aucune session d'analyse récente</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions rapides -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Actions rapides</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'imports:flight_data' %}" class="btn btn-outline-primary btn-block">
+                            <i class="fas fa-upload"></i><br>
+                            Importer des données de vol
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'imports:red_zones' %}" class="btn btn-outline-warning btn-block">
+                            <i class="fas fa-map-marked-alt"></i><br>
+                            Importer des zones rouges
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'analysis:run_analysis' %}" class="btn btn-outline-success btn-block">
+                            <i class="fas fa-search"></i><br>
+                            Lancer une analyse
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'reports:dashboard' %}" class="btn btn-outline-info btn-block">
+                            <i class="fas fa-file-alt"></i><br>
+                            Générer un rapport
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Importation - Dashboard{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <a href="{% url 'imports:flight_data' %}" class="btn btn-primary">
+        <i class="fas fa-plane"></i> Importer des vols
+    </a>
+    <a href="{% url 'imports:red_zones' %}" class="btn btn-warning">
+        <i class="fas fa-map-marked-alt"></i> Importer des zones
+    </a>
+    <a href="{% url 'imports:alerts' %}" class="btn btn-danger">
+        <i class="fas fa-exclamation-triangle"></i> Importer des alertes
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Statistiques -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card card-stats border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            En attente
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_imports }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card card-stats border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Terminés
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ completed_imports }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card card-stats border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Échoués
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ failed_imports }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-times fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Imports récents -->
+<div class="card shadow">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Imports récents</h6>
+    </div>
+    <div class="card-body">
+        {% if recent_imports %}
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th>Enregistrements</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for import in recent_imports %}
+                        <tr>
+                            <td>{{ import.name }}</td>
+                            <td>{{ import.get_file_type_display }}</td>
+                            <td>
+                                {% if import.status == 'completed' %}
+                                    <span class="badge bg-success">Terminé</span>
+                                {% elif import.status == 'processing' %}
+                                    <span class="badge bg-primary">En cours</span>
+                                {% elif import.status == 'failed' %}
+                                    <span class="badge bg-danger">Échoué</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">En attente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>
+                                    Traités: {{ import.records_processed }}<br>
+                                    Créés: {{ import.records_created }}<br>
+                                    Erreurs: {{ import.records_errors }}
+                                </small>
+                            </td>
+                            <td>{{ import.created_at|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'imports:session_detail' import.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> Détails
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">Aucun import récent</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

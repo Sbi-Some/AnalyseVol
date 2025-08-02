@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Importer des données de vol{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-plane"></i> Import de données de vol
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="session_name" class="form-label">Nom de la session</label>
+                        <input type="text" class="form-control" id="session_name" name="session_name" 
+                               placeholder="Ex: Import vol du 15/01/2024">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Fichier CSV/Excel</label>
+                        <input type="file" class="form-control" id="file" name="file" 
+                               accept=".csv,.xlsx,.xls" required>
+                        <div class="form-text">
+                            Formats acceptés: CSV, Excel (.xlsx, .xls)
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Format attendu</h6>
+                        <p class="mb-0">Le fichier doit contenir les colonnes suivantes :</p>
+                        <ul class="mb-0">
+                            <li><strong>aircraft_id</strong> : Identifiant de l'aéronef</li>
+                            <li><strong>timestamp</strong> : Date et heure (format: YYYY-MM-DD HH:MM:SS)</li>
+                            <li><strong>latitude</strong> : Latitude (décimal)</li>
+                            <li><strong>longitude</strong> : Longitude (décimal)</li>
+                            <li><strong>altitude</strong> : Altitude en mètres (optionnel)</li>
+                            <li><strong>speed</strong> : Vitesse en km/h (optionnel)</li>
+                            <li><strong>heading</strong> : Cap en degrés (optionnel)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'imports:dashboard' %}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Importer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

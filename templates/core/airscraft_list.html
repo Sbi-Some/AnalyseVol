@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Liste des aéronefs{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Aéronefs enregistrés</h6>
+    </div>
+    <div class="card-body">
+        {% if aircraft_list %}
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID Aéronef</th>
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Données de vol</th>
+                            <th>Violations</th>
+                            <th>Créé le</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aircraft in aircraft_list %}
+                        <tr>
+                            <td><strong>{{ aircraft.aircraft_id }}</strong></td>
+                            <td>{{ aircraft.name|default:"-" }}</td>
+                            <td>{{ aircraft.aircraft_type|default:"-" }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ aircraft.flight_data_count }}</span>
+                            </td>
+                            <td>
+                                {% if aircraft.violations_count > 0 %}
+                                    <span class="badge bg-danger">{{ aircraft.violations_count }}</span>
+                                {% else %}
+                                    <span class="badge bg-success">0</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ aircraft.created_at|date:"d/m/Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-plane fa-3x text-gray-300 mb-3"></i>
+                <p class="text-muted">Aucun aéronef enregistré</p>
+                <a href="{% url 'imports:flight_data' %}" class="btn btn-primary">
+                    <i class="fas fa-upload"></i> Importer des données de vol
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

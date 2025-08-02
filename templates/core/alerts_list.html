@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Liste des alertes{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'imports:alerts' %}" class="btn btn-danger">
+    <i class="fas fa-upload"></i> Importer des alertes
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Filtres -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="status" class="form-label">Statut</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">Tous</option>
+                    <option value="processed" {% if current_status_filter == 'processed' %}selected{% endif %}>Traitées</option>
+                    <option value="unprocessed" {% if current_status_filter == 'unprocessed' %}selected{% endif %}>Non traitées</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="zone" class="form-label">Zone rouge</label>
+                <select class="form-select" id="zone" name="zone">
+                    <option value="">Toutes</option>
+                    {% for zone in red_zones %}
+                        <option value="{{ zone.id }}" {% if current_zone_filter == zone.id|stringformat:"s" %}selected{% endif %}>
+                            {{ zone.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-filter"></i> Filtrer
+                </button>
+                <a href="{% url 'core:alerts_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Liste des alertes -->
+<div class="card shadow">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Alertes enregistrées</h6>
+    </div>
+    <div class="card-body">
+        {% if alerts_list %}
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Zone rouge</th>
+                            <th>Type</th>
+                            <th>Date/Heure</th>
+                            <th>Violations</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alert in alerts_list %}
+                        <tr>
+                            <td><strong>{{ alert.red_zone.name }}</strong></td>
+                            <td>{{ alert.get_alert_type_display }}</td>
+                            <td>{{ alert.timestamp|date:"d/m/Y H:i:s" }}</td>
+                            <td>
+                                {% if alert.violations_count > 0 %}
+                                    <span class="badge bg-danger">{{ alert.violations_count }}</span>
+                                {% else %}
+                                    <span class="badge bg-success">0</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if alert.is_processed %}
+                                    <span class="badge bg-success">Traitée</span>
+                                {% else %}
+                                    <span class="badge bg-warning">En attente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'reports:alert_report' alert.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> Rapport
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-exclamation-triangle fa-3x text-gray-300 mb-3"></i>
+                <p class="text-muted">Aucune alerte enregistrée</p>
+                <a href="{% url 'imports:alerts' %}" class="btn btn-danger">
+                    <i class="fas fa-upload"></i> Importer des alertes
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
